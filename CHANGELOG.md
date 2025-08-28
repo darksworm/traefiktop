@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/darksworm/traefiktop/compare/v1.0.0...v1.0.1) (2025-08-28)
+
+
+### Bug Fixes
+
+* make package public ([de2c7ff](https://github.com/darksworm/traefiktop/commit/de2c7ff0f2585f463aba49157495f1f5e805f177))
+
 ## 1.0.0 (2025-08-28)
 
 
