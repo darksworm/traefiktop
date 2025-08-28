@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/darksworm/traefiktop/compare/v1.1.0...v1.1.1) (2025-08-28)
+
+
+### Bug Fixes
+
+* remove 'bun run logs' references from user-facing messages ([d339a9e](https://github.com/darksworm/traefiktop/commit/d339a9ebc0be6237de2c33989a34dfccd65053b1))
+
 ## [1.1.0](https://github.com/darksworm/traefiktop/compare/v1.0.1...v1.1.0) (2025-08-28)
 
 
