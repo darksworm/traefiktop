@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.1.0](https://github.com/darksworm/traefiktop/compare/v1.0.1...v1.1.0) (2025-08-28)
+
+
+### Features
+
+* **cli:** implement --tail-logs (with optional --session) and document in --help ([aee1341](https://github.com/darksworm/traefiktop/commit/aee134153c85b97c5cf34c48913b6a2392c96820))
+
+
+### Bug Fixes
+
+* **npm:** add bin mapping and files list so global install provides 'traefiktop' CLI ([067f71e](https://github.com/darksworm/traefiktop/commit/067f71e2f54abf951c2fc6a12a42345ff4bd27c9))
+* remove stale --tail-logs references in messages; point to 'bun run logs' ([d07c9c0](https://github.com/darksworm/traefiktop/commit/d07c9c07348c9e36c14466114a001089a5d32210))
+
+
+### Reverts
+
+* **cli:** remove --tail-logs and related help to restore single-bundle build ([fcf2a08](https://github.com/darksworm/traefiktop/commit/fcf2a0894a5229081f57c79b2866b4b448df9943))
+
 ## [1.0.1](https://github.com/darksworm/traefiktop/compare/v1.0.0...v1.0.1) (2025-08-28)
 
 
