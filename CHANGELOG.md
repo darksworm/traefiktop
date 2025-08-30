@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.2.0](https://github.com/darksworm/traefiktop/compare/v1.1.1...v1.2.0) (2025-08-30)
+
+
+### Features
+
+* **docker:** multi-stage Dockerfile (Alpine runtime), .dockerignore, scripts; CI buildx/QEMU + GHCR login; docs ([36ca3ba](https://github.com/darksworm/traefiktop/commit/36ca3ba1909accd24c93f48cff89a138c9a7eadc))
+* **goreleaser:** migrate to dockers_v2 with multi-arch buildx (single tag + manifest) ([7026f51](https://github.com/darksworm/traefiktop/commit/7026f514bfc2e94e796ae6f240c6b4b16ff8ebb1))
+* **goreleaser:** switch to dockers_v2 with multi-arch buildx (single tag), add v2 Dockerfile using TARGETPLATFORM layout ([7e145b6](https://github.com/darksworm/traefiktop/commit/7e145b6c61ffd61b8adb4c3ccd9e520b2bc38870))
+
+
+### Bug Fixes
+
+* **goreleaser v2:** use 'images' (plural) in dockers_v2 schema ([8821e50](https://github.com/darksworm/traefiktop/commit/8821e50e33bdc4efde0fb706f55565c6645a75ac))
+* **goreleaser:** hardcode GHCR in docker image/manifests to avoid missing REGISTRY env ([22c670e](https://github.com/darksworm/traefiktop/commit/22c670e431958fa4332a8d0c20285193bbd98799))
+* **goreleaser:** remove unsupported default() template; use if/else for REGISTRY; docs: add Docker install option ([14a5fe9](https://github.com/darksworm/traefiktop/commit/14a5fe99008b59fda2da33ea519c671a762e0614))
+* **goreleaser:** use runtime-only Dockerfile that copies prebuilt binary (no source context) ([6397ecb](https://github.com/darksworm/traefiktop/commit/6397ecb81ec3347cb114ffd1a497463ebd9781cb))
+
+
+### Reverts
+
+* **goreleaser:** fallback to dockers + docker_manifests until dockers_v2 lands in v2.12 nightly ([bac3221](https://github.com/darksworm/traefiktop/commit/bac322168bf1bb34af31eb58cb6ad97228953ff7))
+
 ## [1.1.1](https://github.com/darksworm/traefiktop/compare/v1.1.0...v1.1.1) (2025-08-28)
 
 
