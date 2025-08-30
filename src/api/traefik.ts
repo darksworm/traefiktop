@@ -71,7 +71,10 @@ export const RouterSchema = yup
   )
   .required();
 
-const fetchTraefikData = <_T>(url: string): ResultAsync<any[], Error> => {
+const fetchTraefikData = <_T>(
+  url: string,
+  basicAuth?: string,
+): ResultAsync<any[], Error> => {
   // Optionally disable TLS verification only when explicitly requested.
   // Enable by setting TRAEFIKTOP_INSECURE=1 (or run with --insecure flag).
   if (process.env.TRAEFIKTOP_INSECURE === "1") {
@@ -84,7 +87,12 @@ const fetchTraefikData = <_T>(url: string): ResultAsync<any[], Error> => {
       const id = setTimeout(() => controller.abort(), 5000); // 5 second timeout
 
       try {
-        const res = await fetch(url, { signal: controller.signal });
+        const headers = basicAuth
+          ? {
+              Authorization: `Basic ${Buffer.from(basicAuth).toString("base64")}`,
+            }
+          : undefined;
+        const res = await fetch(url, { signal: controller.signal, headers });
         clearTimeout(id);
         if (!res.ok) {
           throw new Error(`Failed to fetch from ${url}: ${res.statusText}`);
@@ -99,8 +107,11 @@ const fetchTraefikData = <_T>(url: string): ResultAsync<any[], Error> => {
   );
 };
 
-export const getRouters = (apiUrl: string): ResultAsync<Router[], Error> =>
-  fetchTraefikData(`${apiUrl}/api/http/routers`).andThen((data) => {
+export const getRouters = (
+  apiUrl: string,
+  basicAuth?: string,
+): ResultAsync<Router[], Error> =>
+  fetchTraefikData(`${apiUrl}/api/http/routers`, basicAuth).andThen((data) => {
     try {
       const parsedRouters = RouterSchema.validateSync(data, {
         strict: true,
@@ -117,8 +128,11 @@ export const getRouters = (apiUrl: string): ResultAsync<Router[], Error> =>
     }
   });
 
-export const getServices = (apiUrl: string): ResultAsync<Service[], Error> =>
-  fetchTraefikData(`${apiUrl}/api/http/services`).andThen((data) => {
+export const getServices = (
+  apiUrl: string,
+  basicAuth?: string,
+): ResultAsync<Service[], Error> =>
+  fetchTraefikData(`${apiUrl}/api/http/services`, basicAuth).andThen((data) => {
     try {
       const parsedServices = ServiceSchema.validateSync(data, {
         strict: true,
@@ -138,9 +152,11 @@ export const getServices = (apiUrl: string): ResultAsync<Service[], Error> =>
 export const getService = (
   apiUrl: string,
   serviceName: string,
+  basicAuth?: string,
 ): ResultAsync<Service, Error> =>
   fetchTraefikData(
     `${apiUrl}/api/http/services/${encodeURIComponent(serviceName)}`,
+    basicAuth,
   ).andThen((data) => {
     try {
       const parsedService = ServiceItemSchema.validateSync(data, {
