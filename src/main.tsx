@@ -61,6 +61,7 @@ async function main() {
   let apiUrl: string | undefined;
   const ignorePatterns: string[] = [];
   let insecure = false;
+  const basicAuth = process.env.TRAEFIKTOP_BASIC_AUTH;
 
   const pushIgnore = (val?: string) => {
     if (!val) return;
@@ -168,7 +169,11 @@ async function main() {
   try {
     render(
       <ErrorBoundary>
-        <RoutersList apiUrl={apiUrl} ignorePatterns={ignorePatterns} />
+        <RoutersList
+          apiUrl={apiUrl}
+          basicAuth={basicAuth}
+          ignorePatterns={ignorePatterns}
+        />
       </ErrorBoundary>,
       {
         stdout: mutableStdout as any,

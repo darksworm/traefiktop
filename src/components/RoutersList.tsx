@@ -9,12 +9,14 @@ import RouterItem from "./RouterItem";
 
 interface RoutersListProps {
   apiUrl: string;
+  basicAuth?: string;
   useTraefikDataHook?: typeof useTraefikData;
   ignorePatterns?: string[];
 }
 
 const RoutersList: React.FC<RoutersListProps> = ({
   apiUrl,
+  basicAuth,
   useTraefikDataHook = useTraefikData,
   ignorePatterns = [],
 }) => {
@@ -35,7 +37,7 @@ const RoutersList: React.FC<RoutersListProps> = ({
     loading,
     error,
     lastUpdated,
-  } = useTraefikDataHook(apiUrl) as any;
+  } = useTraefikDataHook(apiUrl, basicAuth) as any;
 
   // Calculate available screen space
   const headerHeight = 1; // Search bar

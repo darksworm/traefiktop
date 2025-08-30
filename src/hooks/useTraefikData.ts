@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { getRouters, getServices } from "../api/traefik";
 import type { Router, Service } from "../types/traefik";
 
-export const useTraefikData = (apiUrl: string) => {
+export const useTraefikData = (apiUrl: string, basicAuth?: string) => {
   const [routers, setRouters] = useState<Router[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
@@ -17,8 +17,8 @@ export const useTraefikData = (apiUrl: string) => {
       setLoading(true);
       setError(null);
       const [routersResult, servicesResult] = await Promise.all([
-        getRouters(apiUrl),
-        getServices(apiUrl),
+        getRouters(apiUrl, basicAuth),
+        getServices(apiUrl, basicAuth),
       ]);
 
       if (routersResult.isErr()) {
@@ -46,7 +46,7 @@ export const useTraefikData = (apiUrl: string) => {
     // Disabled auto-refresh for now to prevent excessive API calls
     // const intervalId = setInterval(fetchData, 5000); // Refresh every 5 seconds
     // return () => clearInterval(intervalId); // Cleanup on unmount
-  }, [apiUrl, refreshTick]);
+  }, [apiUrl, basicAuth, refreshTick]);
   const refresh = () => setRefreshTick((n) => n + 1);
 
   // Auto-refresh every 10s
@@ -56,7 +56,7 @@ export const useTraefikData = (apiUrl: string) => {
       setRefreshTick((n) => n + 1);
     }, 10_000);
     return () => clearInterval(id);
-  }, [apiUrl]);
+  }, [apiUrl, basicAuth]);
 
   return { routers, services, loading, error, refresh, lastUpdated };
 };

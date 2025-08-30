@@ -4,7 +4,7 @@ import RoutersList from "./RoutersList";
 
 describe("RoutersList", () => {
   it("should render loading state initially", () => {
-    const useTraefikDataMock = () => ({
+    const useTraefikDataMock = (_apiUrl: string, _basicAuth?: string) => ({
       loading: true,
       error: null,
       routers: [],
@@ -17,7 +17,7 @@ describe("RoutersList", () => {
   });
 
   it("should render error state", () => {
-    const useTraefikDataMock = () => ({
+    const useTraefikDataMock = (_apiUrl: string, _basicAuth?: string) => ({
       loading: false,
       error: new Error("Test Error"),
       routers: [],
@@ -52,7 +52,7 @@ describe("RoutersList", () => {
         type: "loadbalancer",
       },
     ];
-    const useTraefikDataMock = () => ({
+    const useTraefikDataMock = (_apiUrl: string, _basicAuth?: string) => ({
       loading: false,
       error: null,
       routers,
