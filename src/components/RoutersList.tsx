@@ -37,6 +37,7 @@ const RoutersList: React.FC<RoutersListProps> = ({
     loading,
     error,
     lastUpdated,
+    refresh,
   } = useTraefikDataHook(apiUrl, basicAuth) as any;
 
   // Calculate available screen space
@@ -62,7 +63,7 @@ const RoutersList: React.FC<RoutersListProps> = ({
     allRouters,
     allServices,
     availableHeight,
-    { ignorePatterns },
+    { ignorePatterns, refresh },
   );
 
   if (loading) {
@@ -297,7 +298,7 @@ const RoutersList: React.FC<RoutersListProps> = ({
           </Text>
           <Text dimColor>{flash ?? ""}</Text>
           <Text>
-            sort: {state.sortMode === "status" ? "dead" : "name"} • s: sort
+            {`sort: ${state.sortMode === "status" ? "dead" : "name"} • s: sort • r: refresh`}
           </Text>
         </Box>
       )}

@@ -10,7 +10,7 @@ export const useTui = (
   routers: Router[],
   services: Service[],
   availableHeight: number,
-  options?: { ignorePatterns?: string[] },
+  options?: { ignorePatterns?: string[]; refresh?: () => void },
 ) => {
   const [state, dispatch] = useReducer(tuiReducer, initialState);
   const ignore = (options?.ignorePatterns || []).map((s) => s.toLowerCase());
@@ -116,7 +116,10 @@ export const useTui = (
         return;
       }
 
-      // no manual refresh key
+      if (input === "r" || input === "R") {
+        options?.refresh?.();
+        return;
+      }
 
       // Sorting controls
       if (input === "s") {
