@@ -9,6 +9,7 @@ describe("RoutersList", () => {
       error: null,
       routers: [],
       services: [],
+      refresh: () => {},
     });
     const { lastFrame } = render(
       <RoutersList apiUrl="" useTraefikDataHook={useTraefikDataMock} />,
@@ -22,6 +23,7 @@ describe("RoutersList", () => {
       error: new Error("Test Error"),
       routers: [],
       services: [],
+      refresh: () => {},
     });
     const { lastFrame } = render(
       <RoutersList apiUrl="" useTraefikDataHook={useTraefikDataMock} />,
@@ -57,6 +59,7 @@ describe("RoutersList", () => {
       error: null,
       routers,
       services,
+      refresh: () => {},
     });
     const { lastFrame } = render(
       <RoutersList apiUrl="" useTraefikDataHook={useTraefikDataMock} />,
@@ -65,5 +68,24 @@ describe("RoutersList", () => {
     // Test shows search header and router count
     expect(output).toContain("🔍 Press / to search");
     expect(output).toContain("1 routers");
+  });
+
+  it("should refresh data when 'r' is pressed", async () => {
+    let refreshed = false;
+    const useTraefikDataMock = () => ({
+      loading: false,
+      error: null,
+      routers: [],
+      services: [],
+      refresh: () => {
+        refreshed = true;
+      },
+    });
+    const { stdin } = render(
+      <RoutersList apiUrl="" useTraefikDataHook={useTraefikDataMock} />,
+    );
+    stdin.write("r");
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(refreshed).toBe(true);
   });
 });
