@@ -15,6 +15,52 @@ use ratatui::{
     backend::CrosstermBackend,
     Terminal,
 };
+
+// RAII guard to ensure terminal is properly restored even if initialization fails
+struct TerminalGuard {
+    terminal: Option<Terminal<CrosstermBackend<std::io::Stdout>>>,
+}
+
+impl TerminalGuard {
+    fn new() -> anyhow::Result<Self> {
+        enable_raw_mode().context("Failed to enable raw mode. Make sure you're running in a proper terminal.")?;
+        let mut stdout = std::io::stdout();
+        execute!(stdout, EnterAlternateScreen, EnableMouseCapture)
+            .context("Failed to initialize terminal. Make sure your terminal supports alternate screen.")?;
+        let backend = CrosstermBackend::new(stdout);
+        let terminal = Terminal::new(backend).context("Failed to create terminal backend")?;
+        
+        Ok(TerminalGuard {
+            terminal: Some(terminal),
+        })
+    }
+    
+    fn take_terminal(&mut self) -> Option<Terminal<CrosstermBackend<std::io::Stdout>>> {
+        self.terminal.take()
+    }
+}
+
+impl Drop for TerminalGuard {
+    fn drop(&mut self) {
+        // Always restore terminal state, regardless of how we exit
+        let _ = disable_raw_mode();
+        if let Some(mut terminal) = self.terminal.take() {
+            let _ = execute!(
+                terminal.backend_mut(),
+                LeaveAlternateScreen,
+                DisableMouseCapture
+            );
+            let _ = terminal.show_cursor();
+        } else {
+            // Terminal was taken, try to restore anyway
+            let _ = execute!(
+                std::io::stdout(),
+                LeaveAlternateScreen,
+                DisableMouseCapture
+            );
+        }
+    }
+}
 use std::{
     io::{self, IsTerminal},
     time::{Duration, Instant},
@@ -90,15 +136,11 @@ async fn main() -> anyhow::Result<()> {
         std::process::exit(1);
     }
 
-    // Setup terminal
-    enable_raw_mode().context("Failed to enable raw mode. Make sure you're running in a proper terminal.")?;
-    let mut stdout = io::stdout();
-    execute!(stdout, EnterAlternateScreen, EnableMouseCapture)
-        .context("Failed to initialize terminal. Make sure your terminal supports alternate screen.")?;
-    let backend = CrosstermBackend::new(stdout);
-    let mut terminal = Terminal::new(backend).context("Failed to create terminal backend")?;
+    // Setup terminal with RAII guard for proper cleanup
+    let mut terminal_guard = TerminalGuard::new()?;
+    let mut terminal = terminal_guard.take_terminal().unwrap();
 
-    // Create app
+    // Create app (failures here will now properly restore terminal)
     let mut app = App::new(cli.host, cli.insecure, cli.ignore)?;
     app.refresh_interval = Duration::from_secs(cli.refresh);
 
@@ -221,14 +263,7 @@ async fn main() -> anyhow::Result<()> {
         }
     }
 
-    // Restore terminal
-    disable_raw_mode()?;
-    execute!(
-        terminal.backend_mut(),
-        LeaveAlternateScreen,
-        DisableMouseCapture
-    )?;
-    terminal.show_cursor()?;
+    // Terminal cleanup is handled automatically by TerminalGuard's Drop implementation
 
     info!("Application exited cleanly");
     Ok(())

@@ -97,10 +97,18 @@ impl App {
         for pattern in &self.ignore_patterns {
             let pattern_lower = pattern.to_lowercase();
             
-            let matches = if pattern_lower.starts_with('*') && pattern_lower.ends_with('*') {
+            let matches = if pattern_lower == "*" {
+                // Universal wildcard - matches everything
+                true
+            } else if pattern_lower.starts_with('*') && pattern_lower.ends_with('*') {
                 // Contains pattern: *foo*
-                let middle = &pattern_lower[1..pattern_lower.len()-1];
-                name_lower.contains(middle)
+                if pattern_lower.len() <= 2 {
+                    // Pattern is "*" or "**", treat as universal wildcard
+                    true
+                } else {
+                    let middle = &pattern_lower[1..pattern_lower.len()-1];
+                    name_lower.contains(middle)
+                }
             } else if pattern_lower.starts_with('*') {
                 // Ends with pattern: *foo
                 let suffix = &pattern_lower[1..];
@@ -432,16 +440,35 @@ impl App {
         let title = match &self.state {
             AppState::Search => {
                 if self.search_query.is_empty() {
-                    format!("🔍 Press / to search ({} routers)", self.filtered_routers.len())
+                    let total_routers = self.traefik_data.as_ref().map(|d| d.routers.len()).unwrap_or(0);
+                    let visible_routers = self.filtered_routers.len();
+                    let hidden_routers = total_routers.saturating_sub(visible_routers);
+                    
+                    if hidden_routers > 0 {
+                        format!("🔍 Press / to search ({} visible, {} hidden, {} total)", 
+                               visible_routers, hidden_routers, total_routers)
+                    } else {
+                        format!("🔍 Press / to search ({} routers)", visible_routers)
+                    }
                 } else {
-                    format!("Filter: {}", self.search_query)
+                    let total_routers = self.traefik_data.as_ref().map(|d| d.routers.len()).unwrap_or(0);
+                    let visible_routers = self.filtered_routers.len();
+                    format!("Filter: {} ({} of {} routers)", self.search_query, visible_routers, total_routers)
                 }
             },
             AppState::Loading => "⏳ Loading Traefik data...".to_string(),
             AppState::Error(_) => "❌ Error loading data".to_string(),
             AppState::Normal => {
                 let total_routers = self.traefik_data.as_ref().map(|d| d.routers.len()).unwrap_or(0);
-                format!("🔍 Press / to search ({} routers)", total_routers)
+                let visible_routers = self.filtered_routers.len();
+                let hidden_routers = total_routers.saturating_sub(visible_routers);
+                
+                if hidden_routers > 0 {
+                    format!("🔍 Press / to search ({} visible, {} hidden, {} total)", 
+                           visible_routers, hidden_routers, total_routers)
+                } else {
+                    format!("🔍 Press / to search ({} routers)", visible_routers)
+                }
             },
         };
 
