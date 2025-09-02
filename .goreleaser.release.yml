@@ -168,13 +168,14 @@ nix:
       branch: main
       token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
 
-# Docker images - create separate configs for each platform
+# Docker images - AMD64 only until ARM64 build issues are resolved
 dockers:
   - id: docker-amd64
     dockerfile: Dockerfile.prebuilt
     ids: [linux-amd64-musl]
     image_templates:
-      - "ghcr.io/darksworm/traefiktop:{{ .Version }}-amd64"
+      - "ghcr.io/darksworm/traefiktop:{{ .Version }}"
+      - "ghcr.io/darksworm/traefiktop:latest"
     build_flag_templates:
       - "--platform=linux/amd64"
       - "--label=org.opencontainers.image.created={{ .Date }}"
@@ -182,30 +183,6 @@ dockers:
       - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
       - "--label=org.opencontainers.image.version={{ .Version }}"
       - "--label=org.opencontainers.image.source=https://github.com/darksworm/traefiktop"
-      
-  - id: docker-arm64
-    dockerfile: Dockerfile.prebuilt
-    ids: [linux-arm64-musl]
-    image_templates:
-      - "ghcr.io/darksworm/traefiktop:{{ .Version }}-arm64"
-    build_flag_templates:
-      - "--platform=linux/arm64"
-      - "--label=org.opencontainers.image.created={{ .Date }}"
-      - "--label=org.opencontainers.image.title={{ .ProjectName }}"
-      - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
-      - "--label=org.opencontainers.image.version={{ .Version }}"
-      - "--label=org.opencontainers.image.source=https://github.com/darksworm/traefiktop"
-
-docker_manifests:
-  - name_template: "ghcr.io/darksworm/traefiktop:{{ .Version }}"
-    image_templates:
-      - "ghcr.io/darksworm/traefiktop:{{ .Version }}-amd64"
-      - "ghcr.io/darksworm/traefiktop:{{ .Version }}-arm64"
-      
-  - name_template: "ghcr.io/darksworm/traefiktop:latest"
-    image_templates:
-      - "ghcr.io/darksworm/traefiktop:{{ .Version }}-amd64"
-      - "ghcr.io/darksworm/traefiktop:{{ .Version }}-arm64"
 
 nfpms:
   - id: linux-packages-standard
