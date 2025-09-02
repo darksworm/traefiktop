@@ -46,8 +46,25 @@ jobs:
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Install sccache
+        uses: taiki-e/install-action@v2
+        with:
+          tool: sccache
+
       - name: Setup Rust Cache  
         uses: Swatinem/rust-cache@v2
+        with:
+          # Cache all target directories for cross-compilation
+          key: rust-cache-cross-compile
+          # Include Zig and cargo-zigbuild in cache key
+          prefix-key: "v1-rust"
+          # Cache registry and git dependencies
+          cache-directories: |
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+          # Cache all target directories
+          cache-all-crates: true
 
       - name: Setup Zig (for GoReleaser Rust cross-compilation)
         uses: mlugg/setup-zig@v2
@@ -58,12 +75,24 @@ jobs:
         uses: taiki-e/install-action@v2
         with:
           tool: cargo-zigbuild
+          
+      - name: Cache cargo-zigbuild
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/cargo-zigbuild
+            ~/.cargo/bin/zigbuild
+          key: cargo-zigbuild-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Set up QEMU (multi-arch)
         uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+        with:
+          # Enable Docker layer caching
+          driver-opts: |
+            image=moby/buildkit:buildx-stable-1
 
       - name: Login to GHCR
         uses: docker/login-action@v3
@@ -102,3 +131,6 @@ jobs:
           AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
           GPG_FINGERPRINT: ${{ secrets.GPG_FINGERPRINT }}
           TAG: ${{ needs.release-please.outputs.tag_name }}
+          # Enable sccache
+          SCCACHE_GHA_ENABLED: "true"
+          RUSTC_WRAPPER: "sccache"
