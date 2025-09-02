@@ -5,33 +5,80 @@ project_name: traefiktop
 # Global hooks (run once before all builds)
 before:
   hooks:
-    - bun install --frozen-lockfile
-    - rm -rf dist
+    - ./tools/cross-compile.sh
 
-# Build with Bun (bun build --compile)
+# Build with Cargo (cross-compilation)
 builds:
-  - id: bun-standard
-    builder: bun
+  - id: rust-linux-amd64
+    env:
+      - CGO_ENABLED=0
+    goos: [linux]
+    goarch: [amd64]
     binary: traefiktop
-    main: src/main.tsx
-    targets:
-      - linux-x64-modern
-      - linux-arm64
-      - darwin-x64
-      - darwin-arm64
+    main: .
+    builder: prebuilt
+    prebuilt:
+      path: target/x86_64-unknown-linux-gnu/release/traefiktop
 
-  - id: bun-musl
-    builder: bun
+  - id: rust-linux-arm64
+    env:
+      - CGO_ENABLED=0
+    goos: [linux]
+    goarch: [arm64]
     binary: traefiktop
-    main: src/main.tsx
-    targets:
-      - linux-x64-musl-modern
-      - linux-arm64-musl
+    main: .
+    builder: prebuilt
+    prebuilt:
+      path: target/aarch64-unknown-linux-gnu/release/traefiktop
+
+  - id: rust-darwin-amd64
+    env:
+      - CGO_ENABLED=0
+    goos: [darwin]
+    goarch: [amd64]
+    binary: traefiktop
+    main: .
+    builder: prebuilt
+    prebuilt:
+      path: target/x86_64-apple-darwin/release/traefiktop
+
+  - id: rust-darwin-arm64
+    env:
+      - CGO_ENABLED=0
+    goos: [darwin]
+    goarch: [arm64]
+    binary: traefiktop
+    main: .
+    builder: prebuilt
+    prebuilt:
+      path: target/aarch64-apple-darwin/release/traefiktop
+
+  - id: rust-linux-musl-amd64
+    env:
+      - CGO_ENABLED=0
+    goos: [linux]
+    goarch: [amd64]
+    binary: traefiktop
+    main: .
+    builder: prebuilt
+    prebuilt:
+      path: target/x86_64-unknown-linux-musl/release/traefiktop
+
+  - id: rust-linux-musl-arm64
+    env:
+      - CGO_ENABLED=0
+    goos: [linux]
+    goarch: [arm64]
+    binary: traefiktop
+    main: .
+    builder: prebuilt
+    prebuilt:
+      path: target/aarch64-unknown-linux-musl/release/traefiktop
 
 # Package artifacts (use tar.gz, no deprecation warnings)
 archives:
-  - id: bun-archives-standard
-    ids: [bun-standard]  # standard builds
+  - id: rust-archives-standard
+    ids: [rust-linux-amd64, rust-linux-arm64, rust-darwin-amd64, rust-darwin-arm64]
     formats: ["tar.gz"]
     name_template: "{{ .ProjectName }}-{{ .Version }}-{{ .Os }}-{{ .Arch }}"
     files:
@@ -39,8 +86,8 @@ archives:
       - README*
       - CHANGELOG*
 
-  - id: bun-archives-musl
-    ids: [bun-musl]  # musl builds
+  - id: rust-archives-musl
+    ids: [rust-linux-musl-amd64, rust-linux-musl-arm64]
     formats: ["tar.gz"]
     name_template: "{{ .ProjectName }}-{{ .Version }}-{{ .Os }}-{{ .Arch }}-musl"
     files:
@@ -52,7 +99,7 @@ homebrew_casks:
   - name: traefiktop
     description: A TUI for visualizing Traefik routing
     homepage: https://github.com/darksworm/traefiktop
-    ids: [bun-archives-standard]
+    ids: [rust-archives-standard]
     binary: traefiktop
     repository:
       owner: darksworm
@@ -133,7 +180,7 @@ aurs:
 
 nix:
   - name: traefiktop
-    ids: [ bun-archives-standard ]
+    ids: [ rust-archives-standard ]
     goamd64: v1
     repository:
       owner: darksworm
@@ -145,8 +192,8 @@ nix:
 # Docker images (dockers_v2)
 dockers_v2:
   - id: docker-multi
-    dockerfile: Dockerfile.v2
-    ids: [bun-musl]
+    dockerfile: Dockerfile.rust
+    ids: [rust-linux-musl-amd64, rust-linux-musl-arm64]
     images:
       - ghcr.io/darksworm/traefiktop
     tags:
@@ -164,7 +211,7 @@ dockers_v2:
 
 nfpms:
   - id: linux-packages-standard
-    ids: [bun-standard]
+    ids: [rust-linux-amd64, rust-linux-arm64]
     formats: [deb, rpm, apk]
     bindir: /usr/bin
     file_name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
@@ -178,7 +225,7 @@ nfpms:
     conflicts: [traefiktop, traefiktop-musl]
 
   - id: linux-packages-musl
-    ids: [bun-musl]
+    ids: [rust-linux-musl-amd64, rust-linux-musl-arm64]
     formats: [deb, rpm, apk]
     bindir: /usr/bin
     file_name_template: "{{ .ProjectName }}-musl_{{ .Version }}_{{ .Os }}_{{ .Arch }}"

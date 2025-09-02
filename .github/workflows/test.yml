@@ -11,29 +11,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version-file: .bun-version
-      - run: bun install --frozen-lockfile
-      - run: bun run test:ci
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          fail_ci_if_error: false
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo test --all-features
 
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version-file: .bun-version
-      - run: bun install --frozen-lockfile
-      - run: bun run build:node
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo build --release
 
   build-binaries:
     if: ${{ github.event_name == 'pull_request' }}
@@ -42,13 +30,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version-file: .bun-version
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+      
+      - name: Setup Rust Cache
+        uses: Swatinem/rust-cache@v2
 
-      - name: Install dependencies
-        run: bun install --frozen-lockfile
+      - name: Install Cross
+        run: cargo install cross --git https://github.com/cross-rs/cross
+
+      - name: Add Rust targets
+        run: |
+          rustup target add x86_64-unknown-linux-gnu
+          rustup target add x86_64-unknown-linux-musl
 
       - name: Set up QEMU (multi-arch)
         uses: docker/setup-qemu-action@v3

@@ -5,14 +5,24 @@
   <img alt="traefiktop" src="assets/logo-light.svg">
 </picture>
  
-[![npm Downloads](https://img.shields.io/npm/dm/traefiktop?style=flat-square&label=npm+downloads)](https://www.npmjs.com/package/traefiktop)
 [![GitHub Downloads](https://img.shields.io/github/downloads/darksworm/traefiktop/total?style=flat-square&label=github+downloads)](https://github.com/darksworm/traefiktop/releases/latest)
 [![Latest Release](https://img.shields.io/github/v/release/darksworm/traefiktop?style=flat-square)](https://github.com/darksworm/traefiktop/releases/latest)
 [![License](https://img.shields.io/github/license/darksworm/traefiktop?style=flat-square)](./LICENSE)
 [![codecov](https://img.shields.io/codecov/c/github/darksworm/traefiktop?style=flat-square)](https://codecov.io/github/darksworm/traefiktop)
 </div>
 
-A simple, keyboard‑friendly terminal UI for exploring Traefik routers and services. Built with React + Ink, focused on clarity over chrome.
+A fast, keyboard‑friendly terminal UI for exploring Traefik routers and services. Rewritten in Rust using Ratatui for improved performance and resource efficiency.
+
+## 🚀 **Major Update: Now Written in Rust!**
+
+**v2.0 Migration**: This version represents a complete rewrite from TypeScript/Node.js to Rust. The CLI interface remains identical, but you'll benefit from:
+
+- **🔥 Faster startup** and lower memory usage
+- **⚡ Better performance** for large Traefik deployments  
+- **📦 Single binary** - no Node.js runtime required
+- **🎯 Same familiar interface** and keyboard shortcuts
+
+> **Migration Note**: The npm package is deprecated as of v2.0. Please use the native binaries instead.
 
 ## 🚀 Installation methods
 
@@ -58,10 +68,13 @@ bun run docker:run -- --host https://traefik.example.org
 </details>
 
 <details>
-  <summary><strong>npm (Linux/macOS)</strong></summary>
+  <summary><strong>npm (DEPRECATED as of v2.0)</strong></summary>
+
+> ⚠️ **Deprecated**: The npm package is no longer maintained as of v2.0. Please use the native binaries instead for better performance.
 
 ```bash
-npm i --global traefiktop
+# Last TypeScript version (v1.x)
+npm i --global traefiktop@1
 ```
 </details>
 
@@ -125,14 +138,14 @@ traefiktop --host https://selfsigned.local --insecure
 - Quit: `q` or `Ctrl+C`
 
 ## Build from source
-Prereqs: Bun ≥ 1.2.20, Node ≥ 18
+Prereqs: Rust ≥ 1.70
 
 ```bash
-bun install
-# Node bundle (dist/cli.js)
-bun run build:node
-# Native binary (bun compile)
-bun run build:binary
+# Build release binary
+cargo build --release
+
+# The binary will be available at target/release/traefiktop
+./target/release/traefiktop --help
 ```
 
 ## Docker
@@ -149,19 +162,17 @@ docker run --rm -it ghcr.io/darksworm/traefiktop:latest \
 Build locally and run:
 
 ```bash
-# Build (uses buildx automatically if enabled)
-bun run docker:build
+# Build multi-arch image
+docker buildx build --platform linux/amd64,linux/arm64 -t traefiktop:dev .
 
 # Run (pass CLI flags after image name)
-bun run docker:run -- --host https://traefik.example.org
+docker run --rm -it traefiktop:dev --host https://traefik.example.org
 ```
 
-Multi‑arch build with buildx (optional):
+Single-arch build:
 
 ```bash
-docker buildx build \
-  --platform linux/amd64,linux/arm64 \
-  -t ghcr.io/darksworm/traefiktop:dev .
+docker build -t traefiktop:dev .
 ```
 
 ## Notes
