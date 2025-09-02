@@ -87,7 +87,7 @@ jobs:
         uses: goreleaser/goreleaser-action@v6
         with:
           distribution: goreleaser
-          version: nightly
+          version: latest
           args: release --config .goreleaser.release.yml --clean
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
