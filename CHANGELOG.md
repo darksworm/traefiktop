@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.1](https://github.com/darksworm/traefiktop/compare/v2.0.0...v2.0.1) (2025-09-02)
+
+
+### Bug Fixes
+
+* temporarily disable ARM64 Docker builds due to build failure ([9745089](https://github.com/darksworm/traefiktop/commit/97450891d1d30d759eae3f6dd42eb9b174cd2afd))
+
 ## [2.0.0](https://github.com/darksworm/traefiktop/compare/v1.2.0...v2.0.0) (2025-09-02)
 
 
