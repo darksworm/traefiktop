@@ -36,13 +36,15 @@ jobs:
       - name: Setup Rust Cache
         uses: Swatinem/rust-cache@v2
 
-      - name: Install Zig and cargo-zigbuild (for GoReleaser cross-compilation)
-        run: |
-          wget -q https://github.com/ziglang/zig/releases/download/0.13.0/zig-linux-x86_64-0.13.0.tar.xz
-          tar -xf zig-linux-x86_64-0.13.0.tar.xz
-          sudo mv zig-linux-x86_64-0.13.0 /opt/zig
-          sudo ln -sf /opt/zig/zig /usr/local/bin/zig
-          cargo install cargo-zigbuild
+      - name: Setup Zig (for GoReleaser cross-compilation)
+        uses: mlugg/setup-zig@v1
+        with:
+          version: "0.13.0"
+          
+      - name: Install cargo-zigbuild 
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-zigbuild
 
       - name: Set up QEMU (multi-arch)
         uses: docker/setup-qemu-action@v3
