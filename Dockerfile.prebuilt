@@ -1,0 +1,14 @@
+# Use minimal scratch image for the smallest possible size
+FROM scratch
+
+# Copy CA certificates for HTTPS requests  
+COPY --from=alpine:latest /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+
+# Copy the pre-built binary (GoReleaser will provide this)
+COPY traefiktop /usr/local/bin/traefiktop
+
+# Ensure colors render nicely by default when attached to a TTY
+ENV TERM=xterm-256color
+
+# Default entrypoint (pass CLI flags at runtime)
+ENTRYPOINT ["/usr/local/bin/traefiktop"]
