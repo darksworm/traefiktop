@@ -1,49 +1,29 @@
-node_modules/
+# Build artifacts
+/target/
+Cargo.lock
+
+# IDEs
 .idea/
-build/
-dist/
-out/
 *.iml
-src/data/licenses.ts
-*.bun-build
-argonaut-cli
-main
-traefiktop-bin/
+
+# Runtime data
 routers.json
 services.json
 
-
-
-# Test coverage reports
-coverage/
-*.lcov
-coverage-final.json
-clover.xml
-
-# Claude Code configurations (user-specific)
+# AI/Claude-related folders and files
+memory/
+coordination/
+AGENTS.md
 .claude/
 .roo/
 .roomodes
 CLAUDE.md
 TODO-tests.md
-
-# Claude Flow runtime data
 .claude-flow/
-
-# Claude Flow generated files
-.claude/settings.local.json
 .mcp.json
 claude-flow.config.json
 .swarm/
 .hive-mind/
-memory/claude-flow-data.json
-memory/sessions/*
-!memory/sessions/README.md
-memory/agents/*
-!memory/agents/README.md
-coordination/memory_bank/*
-coordination/subtasks/*
-coordination/orchestration/*
 *.db
 *.db-journal
 *.db-wal
