@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.0.0](https://github.com/darksworm/traefiktop/compare/v1.2.0...v2.0.0) (2025-09-02)
+
+
+### ⚠ BREAKING CHANGES
+
+* The application is now distributed as a native Rust binary instead of a Node.js package. Users must switch from npm installation to binary installation methods (Homebrew, direct download, or package managers).
+
+### Features
+
+* add refresh shortcut and legend ([6c9a186](https://github.com/darksworm/traefiktop/commit/6c9a186449903335a637c947f6475b8fb81d7e90))
+* migrated to rust ([993e9fd](https://github.com/darksworm/traefiktop/commit/993e9fd57b43ba3341294d45fe2c6fb08369005a))
+
 ## [1.2.0](https://github.com/darksworm/traefiktop/compare/v1.1.1...v1.2.0) (2025-08-30)
 
 
