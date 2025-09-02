@@ -7,77 +7,87 @@ before:
   hooks:
     - ./tools/cross-compile.sh
 
-# Skip builds - we use pre-compiled Rust binaries
+# Create fake builds that reference our pre-built binaries
 builds:
-  - skip: true
+  - id: linux-amd64
+    main: ./fake_build.go
+    binary: traefiktop
+    goos: [linux]
+    goarch: [amd64]
+    hooks:
+      post: 
+        - cp target/x86_64-unknown-linux-gnu/release/traefiktop {{ .Path }}
+        
+  - id: linux-arm64
+    main: ./fake_build.go
+    binary: traefiktop
+    goos: [linux]
+    goarch: [arm64]
+    hooks:
+      post:
+        - cp target/aarch64-unknown-linux-gnu/release/traefiktop {{ .Path }}
+        
+  - id: darwin-amd64
+    main: ./fake_build.go
+    binary: traefiktop
+    goos: [darwin]
+    goarch: [amd64]
+    hooks:
+      post:
+        - cp target/x86_64-apple-darwin/release/traefiktop {{ .Path }}
+        
+  - id: darwin-arm64
+    main: ./fake_build.go
+    binary: traefiktop  
+    goos: [darwin]
+    goarch: [arm64]
+    hooks:
+      post:
+        - cp target/aarch64-apple-darwin/release/traefiktop {{ .Path }}
+        
+  - id: linux-amd64-musl
+    main: ./fake_build.go
+    binary: traefiktop
+    goos: [linux]
+    goarch: [amd64]
+    hooks:
+      post:
+        - cp target/x86_64-unknown-linux-musl/release/traefiktop {{ .Path }}
+        
+  - id: linux-arm64-musl  
+    main: ./fake_build.go
+    binary: traefiktop
+    goos: [linux]
+    goarch: [arm64]
+    hooks:
+      post:
+        - cp target/aarch64-unknown-linux-musl/release/traefiktop {{ .Path }}
 
-# Archive configuration for distribution
+# Package artifacts
 archives:
-  - id: rust-archives-standard 
+  - id: standard
+    builds: [linux-amd64, linux-arm64, darwin-amd64, darwin-arm64]
     format: tar.gz
-    name_template: "{{ .ProjectName }}-{{ .Version }}-linux-amd64"
+    name_template: "{{ .ProjectName }}-{{ .Version }}-{{ .Os }}-{{ .Arch }}"
     files:
       - LICENSE*
       - README*
       - CHANGELOG*
-      - src: target/x86_64-unknown-linux-gnu/release/traefiktop
-        dst: traefiktop
-        
-  - id: rust-archives-linux-arm64
-    format: tar.gz
-    name_template: "{{ .ProjectName }}-{{ .Version }}-linux-arm64"
-    files:
-      - LICENSE*
-      - README*
-      - CHANGELOG*
-      - src: target/aarch64-unknown-linux-gnu/release/traefiktop
-        dst: traefiktop
-        
-  - id: rust-archives-darwin-amd64
-    format: tar.gz
-    name_template: "{{ .ProjectName }}-{{ .Version }}-darwin-amd64"
-    files:
-      - LICENSE*
-      - README*
-      - CHANGELOG*
-      - src: target/x86_64-apple-darwin/release/traefiktop
-        dst: traefiktop
-        
-  - id: rust-archives-darwin-arm64
-    format: tar.gz
-    name_template: "{{ .ProjectName }}-{{ .Version }}-darwin-arm64"
-    files:
-      - LICENSE*
-      - README*
-      - CHANGELOG*
-      - src: target/aarch64-apple-darwin/release/traefiktop
-        dst: traefiktop
 
-  - id: rust-archives-musl-amd64
+  - id: musl
+    builds: [linux-amd64-musl, linux-arm64-musl]
     format: tar.gz
-    name_template: "{{ .ProjectName }}-{{ .Version }}-linux-amd64-musl"
+    name_template: "{{ .ProjectName }}-{{ .Version }}-{{ .Os }}-{{ .Arch }}-musl"
     files:
       - LICENSE*
       - README*
       - CHANGELOG*
-      - src: target/x86_64-unknown-linux-musl/release/traefiktop
-        dst: traefiktop
-        
-  - id: rust-archives-musl-arm64
-    format: tar.gz
-    name_template: "{{ .ProjectName }}-{{ .Version }}-linux-arm64-musl"
-    files:
-      - LICENSE*
-      - README*
-      - CHANGELOG*
-      - src: target/aarch64-unknown-linux-musl/release/traefiktop
-        dst: traefiktop
 
 homebrew_casks:
   - name: traefiktop
     description: A TUI for visualizing Traefik routing
     homepage: https://github.com/darksworm/traefiktop
-    ids: [rust-archives-darwin-amd64, rust-archives-darwin-arm64]
+    ids: [standard]
     binary: traefiktop
     repository:
       owner: darksworm
@@ -158,7 +168,7 @@ aurs:
 
 nix:
   - name: traefiktop
-    ids: [ rust-archives-standard, rust-archives-linux-arm64 ]
+    ids: [ standard ]
     goamd64: v1
     repository:
       owner: darksworm
@@ -166,30 +176,48 @@ nix:
       branch: main
       token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
 
-# Docker images (v2)
-# Docker images (dockers_v2)
-dockers_v2:
-  - id: docker-multi
+# Docker images - create separate configs for each platform
+dockers:
+  - id: docker-amd64
     dockerfile: Dockerfile.rust
-    ids: [rust-archives-musl-amd64, rust-archives-musl-arm64]
-    images:
-      - ghcr.io/darksworm/traefiktop
-    tags:
-      - "{{ .Version }}"
-      - latest
-    platforms:
-      - linux/amd64
-      - linux/arm64
-    labels:
-      org.opencontainers.image.created: "{{ .Date }}"
-      org.opencontainers.image.title: "{{ .ProjectName }}"
-      org.opencontainers.image.revision: "{{ .FullCommit }}"
-      org.opencontainers.image.version: "{{ .Version }}"
-      org.opencontainers.image.source: "https://github.com/darksworm/traefiktop"
+    ids: [linux-amd64-musl]
+    image_templates:
+      - "ghcr.io/darksworm/traefiktop:{{ .Version }}-amd64"
+    build_flag_templates:
+      - "--platform=linux/amd64"
+      - "--label=org.opencontainers.image.created={{ .Date }}"
+      - "--label=org.opencontainers.image.title={{ .ProjectName }}"
+      - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
+      - "--label=org.opencontainers.image.source=https://github.com/darksworm/traefiktop"
+      
+  - id: docker-arm64
+    dockerfile: Dockerfile.rust
+    ids: [linux-arm64-musl]
+    image_templates:
+      - "ghcr.io/darksworm/traefiktop:{{ .Version }}-arm64"
+    build_flag_templates:
+      - "--platform=linux/arm64"
+      - "--label=org.opencontainers.image.created={{ .Date }}"
+      - "--label=org.opencontainers.image.title={{ .ProjectName }}"
+      - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
+      - "--label=org.opencontainers.image.source=https://github.com/darksworm/traefiktop"
+
+docker_manifests:
+  - name_template: "ghcr.io/darksworm/traefiktop:{{ .Version }}"
+    image_templates:
+      - "ghcr.io/darksworm/traefiktop:{{ .Version }}-amd64"
+      - "ghcr.io/darksworm/traefiktop:{{ .Version }}-arm64"
+      
+  - name_template: "ghcr.io/darksworm/traefiktop:latest"
+    image_templates:
+      - "ghcr.io/darksworm/traefiktop:{{ .Version }}-amd64"
+      - "ghcr.io/darksworm/traefiktop:{{ .Version }}-arm64"
 
 nfpms:
   - id: linux-packages-standard
-    ids: [rust-archives-standard, rust-archives-linux-arm64]
+    ids: [linux-amd64, linux-arm64]
     formats: [deb, rpm, apk]
     bindir: /usr/bin
     file_name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
@@ -203,7 +231,7 @@ nfpms:
     conflicts: [traefiktop, traefiktop-musl]
 
   - id: linux-packages-musl
-    ids: [rust-archives-musl-amd64, rust-archives-musl-arm64]
+    ids: [linux-amd64-musl, linux-arm64-musl]
     formats: [deb, rpm, apk]
     bindir: /usr/bin
     file_name_template: "{{ .ProjectName }}-musl_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
