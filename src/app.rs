@@ -69,11 +69,15 @@ impl App {
 
     pub async fn refresh_data(&mut self) -> Result<()> {
         self.state = AppState::Loading;
-        match self.client.fetch_all_data().await {
+        let result = self.client.fetch_all_data().await;
+        
+        // Always update last_update to prevent hammering the API on failures
+        self.last_update = Some(Instant::now());
+        
+        match result {
             Ok(data) => {
                 self.traefik_data = Some(data);
                 self.update_filtered_routers();
-                self.last_update = Some(Instant::now());
                 self.state = if self.search_query.is_empty() {
                     AppState::Normal
                 } else {
