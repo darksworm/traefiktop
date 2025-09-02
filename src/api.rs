@@ -72,34 +72,6 @@ impl TraefikClient {
         Ok(services)
     }
 
-    pub async fn get_service(&self, service_name: &str) -> Result<Service> {
-        let url = format!(
-            "{}/api/http/services/{}",
-            self.base_url,
-            urlencoding::encode(service_name)
-        );
-        let response = self
-            .client
-            .get(&url)
-            .send()
-            .await
-            .context("Failed to send request to Traefik API")?;
-
-        if !response.status().is_success() {
-            return Err(anyhow::anyhow!(
-                "Failed to fetch service {}: HTTP {}",
-                service_name,
-                response.status()
-            ));
-        }
-
-        let service: Service = response
-            .json()
-            .await
-            .context("Failed to parse service JSON")?;
-
-        Ok(service)
-    }
 
     pub async fn fetch_all_data(&self) -> Result<TraefikData> {
         let (routers_result, services_result) = tokio::join!(self.get_routers(), self.get_services());

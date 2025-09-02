@@ -62,7 +62,6 @@ impl Drop for TerminalGuard {
     }
 }
 use std::{
-    io::{self, IsTerminal},
     time::{Duration, Instant},
 };
 use tracing::{error, info};

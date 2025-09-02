@@ -16,9 +16,9 @@ cargo install cross --git https://github.com/cross-rs/cross
 
 echo "Cross-compiling for all targets..."
 
-# Linux GNU targets
+# Linux GNU targets (use cross for better compatibility)
 echo "Building for x86_64-unknown-linux-gnu..."
-cargo build --release --target x86_64-unknown-linux-gnu
+cross build --release --target x86_64-unknown-linux-gnu
 
 echo "Building for aarch64-unknown-linux-gnu..."
 cross build --release --target aarch64-unknown-linux-gnu

@@ -7,7 +7,7 @@ use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
     text::{Line, Span},
-    widgets::{Block, Borders, List, ListItem, ListState, Paragraph},
+    widgets::{ListState, Paragraph},
     Frame,
 };
 use std::time::{Duration, Instant};
@@ -253,7 +253,7 @@ impl App {
 
     fn get_router_start_line(&self, router_index: usize) -> usize {
         let mut line_count = 0;
-        let all_services = self.traefik_data.as_ref().map(|d| &d.services[..]).unwrap_or(&[]);
+        let _all_services = self.traefik_data.as_ref().map(|d| &d.services[..]).unwrap_or(&[]);
         
         for i in 0..router_index {
             if i >= self.filtered_routers.len() {
@@ -345,7 +345,7 @@ impl App {
             total_lines += 1;
             
             // Service lines
-            if let Some(ref data) = self.traefik_data {
+            if let Some(ref _data) = self.traefik_data {
                 if let Some(main_service) = self.get_service_for_router(router) {
                     if main_service.service_type.as_deref() == Some("failover") || main_service.failover.is_some() {
                         // Failover service line
@@ -404,21 +404,12 @@ impl App {
         self.update_filtered_routers_with_reset(true); // Reset position on sort change
     }
 
-    pub fn get_selected_router(&self) -> Option<&Router> {
-        self.list_state
-            .selected()
-            .and_then(|i| self.filtered_routers.get(i))
-    }
 
     pub fn get_service_for_router(&self, router: &Router) -> Option<&Service> {
         let services = &self.traefik_data.as_ref()?.services;
         crate::service_status::find_service_by_name(&router.service, services)
     }
 
-    pub fn get_service_by_name(&self, service_name: &str) -> Option<&Service> {
-        let services = &self.traefik_data.as_ref()?.services;
-        crate::service_status::find_service_by_name(service_name, services)
-    }
 
     pub fn render(&mut self, frame: &mut Frame) {
         let size = frame.area();
@@ -436,47 +427,6 @@ impl App {
         self.render_footer(frame, chunks[1]);
     }
 
-    fn render_header(&self, frame: &mut Frame, area: Rect) {
-        let title = match &self.state {
-            AppState::Search => {
-                if self.search_query.is_empty() {
-                    let total_routers = self.traefik_data.as_ref().map(|d| d.routers.len()).unwrap_or(0);
-                    let visible_routers = self.filtered_routers.len();
-                    let hidden_routers = total_routers.saturating_sub(visible_routers);
-                    
-                    if hidden_routers > 0 {
-                        format!("🔍 Press / to search ({} visible, {} hidden, {} total)", 
-                               visible_routers, hidden_routers, total_routers)
-                    } else {
-                        format!("🔍 Press / to search ({} routers)", visible_routers)
-                    }
-                } else {
-                    let total_routers = self.traefik_data.as_ref().map(|d| d.routers.len()).unwrap_or(0);
-                    let visible_routers = self.filtered_routers.len();
-                    format!("Filter: {} ({} of {} routers)", self.search_query, visible_routers, total_routers)
-                }
-            },
-            AppState::Loading => "⏳ Loading Traefik data...".to_string(),
-            AppState::Error(_) => "❌ Error loading data".to_string(),
-            AppState::Normal => {
-                let total_routers = self.traefik_data.as_ref().map(|d| d.routers.len()).unwrap_or(0);
-                let visible_routers = self.filtered_routers.len();
-                let hidden_routers = total_routers.saturating_sub(visible_routers);
-                
-                if hidden_routers > 0 {
-                    format!("🔍 Press / to search ({} visible, {} hidden, {} total)", 
-                           visible_routers, hidden_routers, total_routers)
-                } else {
-                    format!("🔍 Press / to search ({} routers)", visible_routers)
-                }
-            },
-        };
-
-        let header = Paragraph::new(title)
-            .style(Style::default().fg(Color::Gray));
-
-        frame.render_widget(header, area);
-    }
 
     fn render_main_content(&mut self, frame: &mut Frame, area: Rect) {
         match &self.state {
