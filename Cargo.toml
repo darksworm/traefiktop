@@ -1,6 +1,6 @@
 [package]
 name = "traefiktop"
-version = "2.1.0"
+version = "2.2.0"
 edition = "2021"
 description = "A TUI for visualizing Traefik routing"
 authors = ["darksworm (Ilmars Janis Bluzmanis)"]
