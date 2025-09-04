@@ -45,11 +45,6 @@ jobs:
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Install sccache
-        uses: taiki-e/install-action@v2
-        with:
-          tool: sccache
-
       - name: Setup Rust Cache  
         uses: Swatinem/rust-cache@v2
         with:
@@ -130,9 +125,9 @@ jobs:
           AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
           GPG_FINGERPRINT: ${{ secrets.GPG_FINGERPRINT }}
           TAG: ${{ needs.release-please.outputs.tag_name }}
-          # Enable sccache
-          SCCACHE_GHA_ENABLED: "true"
-          RUSTC_WRAPPER: "sccache"
+          # Disable sccache for cross-compilation due to incompatibility with cargo-zigbuild
+          # sccache doesn't support Zig's cross-compilation setup
+          SCCACHE_GHA_ENABLED: "false"
 
       - name: Promote pre-release to full release
         if: success()
