@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.1.0](https://github.com/darksworm/traefiktop/compare/v2.0.2...v2.1.0) (2025-09-04)
+
+
+### Features
+
+* prevent install script issues with release timing ([b0a4731](https://github.com/darksworm/traefiktop/commit/b0a4731a5b04c1597575efbbfeb7d4c0bc0d9c83))
+
+
+### Bug Fixes
+
+* add checkout step and manifest file for release-please ([c9ca0b0](https://github.com/darksworm/traefiktop/commit/c9ca0b0f9be08f601b33c4732e8d6942b56b09d7))
+* disable sccache to resolve cross-compilation build failures ([d0cca12](https://github.com/darksworm/traefiktop/commit/d0cca12d8ea984a976cf97f4b7558dc36aacadac))
+* revert to simple release-please config with prerelease support ([f393b8d](https://github.com/darksworm/traefiktop/commit/f393b8d5b26af12032b8ffc4b480ba50ad4c59a2))
+
 ## [2.0.2](https://github.com/darksworm/traefiktop/compare/v2.0.1...v2.0.2) (2025-09-04)
 
 
