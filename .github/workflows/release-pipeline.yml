@@ -19,15 +19,14 @@ jobs:
       release_created: ${{ steps.release.outputs.release_created }}
       tag_name: ${{ steps.release.outputs.tag_name }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      
       - name: release
         id: release
         uses: googleapis/release-please-action@v4
         with:
           token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
-          config-file: .release-please-config.json
+          release-type: rust
+          package-name: traefiktop
+          prerelease: true
 
   goreleaser:
     needs: release-please
