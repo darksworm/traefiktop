@@ -12,8 +12,7 @@
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "sed -i.bak '/^\\[package\\]/,/^\\[/ s/^version = \"[^\"]*\"/version = \"${nextRelease.version}\"/' Cargo.toml && rm -f Cargo.toml.bak",
-        "publishCmd": "echo 'Building and releasing with GoReleaser...' && goreleaser release --config .goreleaser.release.yml --clean"
+        "prepareCmd": "sed -i.bak '/^\\[package\\]/,/^\\[/ s/^version = \"[^\"]*\"/version = \"${nextRelease.version}\"/' Cargo.toml && rm -f Cargo.toml.bak"
       }
     ],
     [
@@ -30,6 +29,12 @@
         "failComment": false,
         "failTitle": false,
         "labels": false
+      }
+    ],
+    [
+      "@semantic-release/exec",
+      {
+        "publishCmd": "echo 'Building and releasing with GoReleaser...' && goreleaser release --config .goreleaser.release.yml --clean"
       }
     ]
   ]
