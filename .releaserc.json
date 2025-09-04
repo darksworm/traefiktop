@@ -1,0 +1,36 @@
+{
+  "branches": ["main"],
+  "plugins": [
+    "@semantic-release/commit-analyzer",
+    "@semantic-release/release-notes-generator",
+    [
+      "@semantic-release/changelog", 
+      {
+        "changelogFile": "CHANGELOG.md"
+      }
+    ],
+    [
+      "@semantic-release/exec",
+      {
+        "prepareCmd": "sed -i.bak 's/version = \"[^\"]*\"/version = \"${nextRelease.version}\"/' Cargo.toml && rm -f Cargo.toml.bak",
+        "publishCmd": "echo 'Building and releasing with GoReleaser...' && goreleaser release --config .goreleaser.release.yml --clean"
+      }
+    ],
+    [
+      "@semantic-release/git",
+      {
+        "assets": ["CHANGELOG.md", "Cargo.toml"],
+        "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+      }
+    ],
+    [
+      "@semantic-release/github",
+      {
+        "successComment": false,
+        "failComment": false,
+        "failTitle": false,
+        "labels": false
+      }
+    ]
+  ]
+}

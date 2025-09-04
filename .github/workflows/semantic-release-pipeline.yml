@@ -1,0 +1,116 @@
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  packages: write
+  id-token: write
+
+name: semantic-release-pipeline
+
+jobs:
+  semantic-release:
+    runs-on: ubuntu-latest
+    outputs:
+      release_published: ${{ steps.semantic.outputs.new_release_published }}
+      tag_name: ${{ steps.semantic.outputs.new_release_git_tag }}
+      version: ${{ steps.semantic.outputs.new_release_version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Setup Git identity
+        run: |
+          git config --global user.name "semantic-release[bot]"
+          git config --global user.email "semantic-release[bot]@users.noreply.github.com"
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Setup Rust Cache  
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: rust-cache-cross-compile
+          prefix-key: "v1-rust"
+          cache-directories: |
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+          cache-all-crates: true
+
+      - name: Setup Zig (for GoReleaser Rust cross-compilation)
+        uses: mlugg/setup-zig@v2
+        with:
+          version: "0.13.0"
+          
+      - name: Install cargo-zigbuild (for GoReleaser Rust cross-compilation)
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-zigbuild
+          
+      - name: Cache cargo-zigbuild
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/cargo-zigbuild
+            ~/.cargo/bin/zigbuild
+          key: cargo-zigbuild-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Set up QEMU (multi-arch)
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver-opts: |
+            image=moby/buildkit:buildx-stable-1
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup SSH key for AUR
+        if: env.AUR_SSH_PRIVATE_KEY != ''
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+        env:
+          AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+
+      - name: Import GPG key
+        if: env.GPG_PRIVATE_KEY != ''
+        uses: crazy-max/ghaction-import-gpg@v6
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PRIVATE_KEY_PASSPHRASE }}
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run semantic-release
+        id: semantic
+        run: npx semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HOMEBREW_TAP_GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          GPG_FINGERPRINT: ${{ secrets.GPG_FINGERPRINT }}
+          # Disable sccache for cross-compilation due to incompatibility with cargo-zigbuild
+          SCCACHE_GHA_ENABLED: "false"
