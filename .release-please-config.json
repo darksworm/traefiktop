@@ -1,0 +1,11 @@
+{
+  "release-type": "rust",
+  "package-name": "traefiktop",
+  "draft": true,
+  "packages": {
+    ".": {
+      "package-name": "traefiktop",
+      "release-type": "rust"
+    }
+  }
+}
