@@ -26,21 +26,10 @@ jobs:
           token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
           release-type: rust
           package-name: traefiktop
-
-  mark-prerelease:
-    needs: release-please
-    if: ${{ needs.release-please.outputs.release_created == 'true' }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Mark release as pre-release
-        run: |
-          gh release edit ${{ needs.release-please.outputs.tag_name }} --prerelease
-        env:
-          GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
-          GH_REPO: ${{ github.repository }}
+          draft: true
 
   goreleaser:
-    needs: [release-please, mark-prerelease]
+    needs: release-please
     if: ${{ needs.release-please.outputs.release_created == 'true' }}
     runs-on: ubuntu-latest
     steps:
@@ -142,10 +131,10 @@ jobs:
           # sccache doesn't support Zig's cross-compilation setup
           SCCACHE_GHA_ENABLED: "false"
 
-      - name: Promote pre-release to full release
+      - name: Publish draft release
         if: success()
         run: |
-          gh release edit ${{ needs.release-please.outputs.tag_name }} --latest
+          gh release edit ${{ needs.release-please.outputs.tag_name }} --draft=false
         env:
           GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
           GH_REPO: ${{ github.repository }}
