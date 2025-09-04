@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.3.0](https://github.com/darksworm/traefiktop/compare/v2.2.0...v2.3.0) (2025-09-04)
+
+
+### Features
+
+* implement clean draft release workflow for perfect asset timing ([a590754](https://github.com/darksworm/traefiktop/commit/a590754364b52fb63c7baaecb5b4b6cf5155fa5a))
+
+
+### Bug Fixes
+
+* implement proper draft releases using config file approach ([cc4d7c6](https://github.com/darksworm/traefiktop/commit/cc4d7c662779fd904b419db61a2941f95e75e50b))
+
 ## [2.2.0](https://github.com/darksworm/traefiktop/compare/v2.1.0...v2.2.0) (2025-09-04)
 
 
