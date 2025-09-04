@@ -16,6 +16,7 @@ use std::time::{Duration, Instant};
 pub enum AppState {
     Normal,
     Search,
+    Filtered, // New state: search query is committed and filtering is active
     Loading,
     Error(String),
 }
@@ -78,11 +79,15 @@ impl App {
             Ok(data) => {
                 self.traefik_data = Some(data);
                 self.update_filtered_routers();
-                self.state = if self.search_query.is_empty() {
-                    AppState::Normal
-                } else {
-                    AppState::Search
-                };
+                // Only change state if we're currently loading
+                // This preserves search/filtered states during refresh
+                if self.state == AppState::Loading {
+                    self.state = if self.search_query.is_empty() {
+                        AppState::Normal
+                    } else {
+                        AppState::Filtered
+                    };
+                }
             }
             Err(e) => {
                 self.state = AppState::Error(format!("Failed to fetch data: {}", e));
@@ -391,6 +396,14 @@ impl App {
         self.update_filtered_routers_with_reset(true); // Reset position when clearing search
     }
 
+    pub fn commit_search(&mut self) {
+        if !self.search_query.is_empty() {
+            self.state = AppState::Filtered;
+        } else {
+            self.state = AppState::Normal;
+        }
+    }
+
     pub fn update_search_query(&mut self, query: String) {
         self.search_query = query;
         self.update_filtered_routers_with_reset(true); // Reset position on search change
@@ -627,6 +640,30 @@ impl App {
                 };
                 Paragraph::new(search_content)
                     .style(Style::default().fg(Color::Yellow))
+            }
+            AppState::Filtered => {
+                let mut footer_spans = vec![
+                    Span::raw("Filtered: "),
+                    Span::styled(&self.search_query, Style::default().fg(Color::Cyan)),
+                    Span::raw(" | q: quit | r: refresh | /: new search | ESC: clear filter | s: sort | sort: "),
+                ];
+
+                let sort_mode_str = match self.sort_mode {
+                    SortMode::Dead => "dead",
+                    SortMode::Name => "name",
+                };
+                footer_spans.push(Span::styled(sort_mode_str, Style::default().fg(Color::Cyan)));
+
+                if let Some(last_update) = self.last_update {
+                    let elapsed = last_update.elapsed();
+                    footer_spans.push(Span::raw(format!(
+                        " | {}s ago",
+                        elapsed.as_secs()
+                    )));
+                }
+
+                Paragraph::new(Line::from(footer_spans))
+                    .style(Style::default().fg(Color::Gray))
             }
             _ => {
                 let sort_mode_str = match self.sort_mode {

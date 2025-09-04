@@ -168,7 +168,7 @@ async fn main() -> anyhow::Result<()> {
                                 app.exit_search_mode();
                             }
                             KeyCode::Enter => {
-                                app.state = AppState::Normal;
+                                app.commit_search();
                             }
                             KeyCode::Backspace => {
                                 app.search_query.pop();
@@ -181,16 +181,67 @@ async fn main() -> anyhow::Result<()> {
                             _ => {}
                         }
                     }
+                    AppState::Filtered => {
+                        match key.code {
+                            KeyCode::Esc => {
+                                app.exit_search_mode();
+                            }
+                            KeyCode::Char('q') => {
+                                app.quit();
+                            }
+                            KeyCode::Char('r') | KeyCode::Char('R') => {
+                                if let Err(e) = app.refresh_data().await {
+                                    error!("Failed to refresh data: {}", e);
+                                }
+                            }
+                            KeyCode::Char('/') => {
+                                app.enter_search_mode();
+                            }
+                            KeyCode::Char('s') | KeyCode::Char('S') => {
+                                app.toggle_sort_mode();
+                            }
+                            KeyCode::Up | KeyCode::Char('k') => {
+                                app.previous_router();
+                                app.pending_g_key = false;
+                            }
+                            KeyCode::Down | KeyCode::Char('j') => {
+                                app.next_router();
+                                app.pending_g_key = false;
+                            }
+                            KeyCode::Char('g') => {
+                                if app.pending_g_key {
+                                    app.go_to_first_router();
+                                    app.pending_g_key = false;
+                                } else {
+                                    app.pending_g_key = true;
+                                }
+                            }
+                            KeyCode::Char('G') => {
+                                app.go_to_last_router();
+                                app.pending_g_key = false;
+                            }
+                            KeyCode::PageDown => {
+                                app.page_down(10);
+                                app.pending_g_key = false;
+                            }
+                            KeyCode::PageUp => {
+                                app.page_up(10);
+                                app.pending_g_key = false;
+                            }
+                            KeyCode::Char('c') if key.modifiers.contains(KeyModifiers::CONTROL) => {
+                                app.quit();
+                            }
+                            _ => {
+                                app.pending_g_key = false;
+                            }
+                        }
+                    }
                     _ => {
                         match key.code {
                             KeyCode::Char('q') => {
                                 app.quit();
                             }
                             KeyCode::Char('r') | KeyCode::Char('R') => {
-                                tokio::spawn(async move {
-                                    // This would need to be handled differently in a real app
-                                    // For now, we'll just mark that a refresh is needed
-                                });
                                 if let Err(e) = app.refresh_data().await {
                                     error!("Failed to refresh data: {}", e);
                                 }
