@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.2.0](https://github.com/darksworm/traefiktop/compare/v2.1.0...v2.2.0) (2025-09-04)
+
+
+### Features
+
+* implement manual pre-release marking for reliable asset timing ([1f27032](https://github.com/darksworm/traefiktop/commit/1f27032a0e6f31efe170a492c83d353f3841c1da))
+* use draft releases for clean asset timing (much better!) ([508a665](https://github.com/darksworm/traefiktop/commit/508a66595bb63c59629dba7f96b8fe539b7846f7))
+
 ## [2.1.0](https://github.com/darksworm/traefiktop/compare/v2.0.2...v2.1.0) (2025-09-04)
 
 
