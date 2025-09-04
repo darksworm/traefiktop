@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.0.2](https://github.com/darksworm/traefiktop/compare/v2.0.1...v2.0.2) (2025-09-04)
+
+
+### Bug Fixes
+
+* search query now persists until ESC is pressed ([772d3e0](https://github.com/darksworm/traefiktop/commit/772d3e0239b444abba536d5e2f7e367f8872f47e))
+
+
+### Performance Improvements
+
+* add comprehensive caching to speed up CI builds ([188d835](https://github.com/darksworm/traefiktop/commit/188d83534329655e8109af2eb8487505f7bbeb80))
+
 ## [2.0.1](https://github.com/darksworm/traefiktop/compare/v2.0.0...v2.0.1) (2025-09-02)
 
 
