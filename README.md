@@ -13,17 +13,6 @@
 
 A fast, keyboard‑friendly terminal UI for exploring Traefik routers and services. Rewritten in Rust using Ratatui for improved performance and resource efficiency.
 
-## 🚀 **Major Update: Now Written in Rust!**
-
-**v2.0 Migration**: This version represents a complete rewrite from TypeScript/Node.js to Rust. The CLI interface remains identical, but you'll benefit from:
-
-- **🔥 Faster startup** and lower memory usage
-- **⚡ Better performance** for large Traefik deployments  
-- **📦 Single binary** - no Node.js runtime required
-- **🎯 Same familiar interface** and keyboard shortcuts
-
-> **Migration Note**: The npm package is deprecated as of v2.0. Please use the native binaries instead.
-
 ## 🚀 Installation methods
 
 <details>
@@ -65,17 +54,6 @@ bun run docker:build
 bun run docker:run -- --host https://traefik.example.org
 ```
 
-</details>
-
-<details>
-  <summary><strong>npm (DEPRECATED as of v2.0)</strong></summary>
-
-> ⚠️ **Deprecated**: The npm package is no longer maintained as of v2.0. Please use the native binaries instead for better performance.
-
-```bash
-# Last TypeScript version (v1.x)
-npm i --global traefiktop@1
-```
 </details>
 
 <details>
